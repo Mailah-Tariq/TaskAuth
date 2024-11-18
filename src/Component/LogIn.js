@@ -14,15 +14,15 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); // Show loader
+    setLoading(true); 
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      setLoading(false); // Hide loader
+      setLoading(false);
       toast.success('Login successful!');
       navigate('/todos');
     } catch (err) {
-      setLoading(false); // Hide loader
+      setLoading(false); 
       toast.error(
         err.code === 'auth/user-not-found'
           ? "You don't have an account. Please sign up."
