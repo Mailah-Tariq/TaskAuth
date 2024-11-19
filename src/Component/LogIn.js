@@ -14,15 +14,14 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true); 
+    setLoading(true);
 
     try {
       await signInWithEmailAndPassword(auth, email, password);
       setLoading(false);
-      toast.success('Login successful!');
-      navigate('/todos');
+      navigate('/todos', { state: { message: 'Login successful!' } }); // Pass message to TodoList
     } catch (err) {
-      setLoading(false); 
+      setLoading(false);
       toast.error(
         err.code === 'auth/user-not-found'
           ? "You don't have an account. Please sign up."
@@ -69,7 +68,7 @@ const Login = () => {
           </Button>
         </div>
       </Card>
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center" autoClose={3000} />
     </Container>
   );
 };

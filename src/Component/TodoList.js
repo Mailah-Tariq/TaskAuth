@@ -5,9 +5,13 @@ import TodoModal from './TodoModal';
 import { Button, Container, Spinner } from 'react-bootstrap';
 import { auth } from '../firebaseConfig';
 import LogOut from './LogOut';
+import { useLocation } from 'react-router-dom'; // Import useLocation for state
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const TodoList = () => {
   const dispatch = useDispatch();
+  const location = useLocation(); // Access state from navigation
   const todos = useSelector((state) => state.todos.lists);
   const addStatus = useSelector((state) => state.todos.addStatus);
   const updateStatus = useSelector((state) => state.todos.updateStatus);
@@ -20,10 +24,15 @@ const TodoList = () => {
     if (auth.currentUser) {
       dispatch(fetchTodos(auth.currentUser.uid));
     }
-  }, [dispatch]);
+
+    // Display toast notification from Login component
+    if (location.state?.message) {
+      toast.success(location.state.message);
+    }
+  }, [dispatch, location]);
 
   const openModal = (todo = null) => {
-    setSelectedTodo(todo); 
+    setSelectedTodo(todo);
     setShowModal(true);
   };
 
@@ -35,24 +44,27 @@ const TodoList = () => {
   const handleSaveTodo = (name, details, setErrors) => {
     const errors = {};
     if (!name.trim()) {
-      errors.name = "Task Name is required.";
+      errors.name = 'Task Name is required.';
     }
     if (!details.trim()) {
-      errors.details = "Task Details are required.";
+      errors.details = 'Task Details are required.';
     }
-  
+
     if (Object.keys(errors).length > 0) {
       setErrors(errors);
       return;
     }
-  
+
     if (selectedTodo) {
       dispatch(updateTodo({ id: selectedTodo.id, updatedTodo: { name, details } }));
+      toast.success('Task updated successfully!'); // Show toast on update
     } else {
       dispatch(addTodo({ name, details, userId: auth.currentUser.uid }));
+      toast.success('Task added successfully!'); // Show toast on add
     }
     closeModal();
   };
+
   return (
     <Container className="my-5">
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -107,7 +119,10 @@ const TodoList = () => {
                     <Button
                       variant="danger"
                       size="sm"
-                      onClick={() => dispatch(deleteTodo(todo.id))}
+                      onClick={() => {
+                        dispatch(deleteTodo(todo.id));
+                        toast.success('Task deleted successfully!'); // Show toast on delete
+                      }}
                       disabled={deleteStatus[todo.id] === 'loading'}
                     >
                       {deleteStatus[todo.id] === 'loading' ? (
@@ -130,6 +145,7 @@ const TodoList = () => {
         todo={selectedTodo}
         onSave={handleSaveTodo}
       />
+      <ToastContainer position="top-center" autoClose={3000} />
     </Container>
   );
 };
