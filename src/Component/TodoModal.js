@@ -1,13 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 
 const TodoModal = ({ show, handleClose, todo, onSave }) => {
-  const [name, setName] = useState(todo?.name || "");
-  const [details, setDetails] = useState(todo?.details || "");
+  const [name, setName] = useState("");
+  const [details, setDetails] = useState("");
   const [errors, setErrors] = useState({}); // State to store errors
 
+  // Synchronize the modal fields with the `todo` prop
+  useEffect(() => {
+    if (todo) {
+      setName(todo.name);
+      setDetails(todo.details);
+    } else {
+      setName("");
+      setDetails("");
+    }
+  }, [todo]); // Re-run this effect whenever `todo` changes
+
   const handleSave = () => {
-    onSave(name, details, setErrors); // Pass setErrors to handleSaveTodo
+    const validationErrors = {};
+    if (!name.trim()) validationErrors.name = "Task Name is required.";
+    if (!details.trim()) validationErrors.details = "Task Details are required.";
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors); // Show validation errors
+      return;
+    }
+
+    onSave(name, details, setErrors); // Pass the data to the parent
   };
 
   return (
@@ -23,11 +43,9 @@ const TodoModal = ({ show, handleClose, todo, onSave }) => {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              isInvalid={!!errors.name} // Highlight the field if there's an error
+              isInvalid={!!errors.name} // Highlight field if there's an error
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.name}
-            </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{errors.name}</Form.Control.Feedback>
           </Form.Group>
           <Form.Group controlId="taskDetails" className="mb-3">
             <Form.Label>Task Details</Form.Label>
@@ -36,11 +54,9 @@ const TodoModal = ({ show, handleClose, todo, onSave }) => {
               rows={3}
               value={details}
               onChange={(e) => setDetails(e.target.value)}
-              isInvalid={!!errors.details} // Highlight the field if there's an error
+              isInvalid={!!errors.details} // Highlight field if there's an error
             />
-            <Form.Control.Feedback type="invalid">
-              {errors.details}
-            </Form.Control.Feedback>
+            <Form.Control.Feedback type="invalid">{errors.details}</Form.Control.Feedback>
           </Form.Group>
         </Form>
       </Modal.Body>
